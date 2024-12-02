@@ -2,6 +2,7 @@ const GitHubService = require('./services/github/github');
 const AIAnalysisService = require('./services/AIAnalysis/Gemini');
 const PDFReportService = require('./services/PDF/PDF');
 const path = require('path');
+const { get } = require('http');
 
 require('dotenv').config();
 
@@ -11,8 +12,10 @@ require('dotenv').config();
         const aiAnalysisService = new AIAnalysisService(process.env.GOOGLE_AI_KEY);
         const pdfReportService = new PDFReportService();
 
+        aiAnalysisService.setPrompt(process.env.AI_PROMPT || aiAnalysisService.getDefaultPrompt());
+
         const lookbackDays = parseInt(process.env.COMMIT_LOOKBACK_DAYS);
-        
+
 
         const today = new Date();
         const startDate = new Date(today);
@@ -45,7 +48,7 @@ require('dotenv').config();
             });
         }
 
-        const outputPath = path.join(__dirname, process.env.OUTPUT_PATH || 'commit_report.pdf');
+        const outputPath = path.join(process.env.OUTPUT_PATH || 'commit_report.pdf');
         pdfReportService.generatePDFReport(analysisResults, outputPath);
     } catch (error) {
         console.error("오류가 발생했습니다:", error);

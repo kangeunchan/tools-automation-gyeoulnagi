@@ -4,24 +4,20 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
  * AI 기반 커밋 분석을 담당하는 클래스
  */
 class AIAnalysisService {
-    constructor(googleAIKey) {
+    constructor(googleAIKey, defaultPrompt) {
         this.genAI = new GoogleGenerativeAI(googleAIKey);
-        this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+        this.prompt = defaultPrompt || this.getDefaultPrompt();
     }
 
-    generateCommitAnalysisPrompt(commitDetails) {
-        const { commit, files } = commitDetails;
-        const fileChanges = files.map(file =>
-            `파일: ${file.filename}\n상태: ${file.status}\n변경 내용: ${file.patch || '상세 변경 사항 없음'}`
-        ).join('\n\n');
-
+    getDefaultPrompt() {
         return `다음 git 커밋을 분석해주세요:
-                커밋 메시지: ${commit.message}
-                커밋 작성자: ${commit.author.name}
-                커밋 날짜: ${commit.author.date}
+                커밋 메시지: {커밋 메시지}
+                커밋 작성자: {커밋 작성자}
+                커밋 날짜: {커밋 날짜}
 
                 파일 변경 사항:
-                ${fileChanges}
+                {파일 변경 사항}
 
                 답변에 대해서 무조건 지켜야 할 규칙:
                 1. 답변은 최소 A4용지 3분의 1 이상은 되야한다.
@@ -39,6 +35,23 @@ class AIAnalysisService {
                 2. 코드로 작성된 기능
                 3. 주목할 만한 패턴 또는 개선 사항
                 `;
+    }
+
+    setPrompt(customPrompt) {
+        this.prompt = customPrompt || this.getDefaultPrompt();
+    }
+
+    generateCommitAnalysisPrompt(commitDetails) {
+        const { commit, files } = commitDetails;
+        const fileChanges = files.map(file =>
+            `파일: ${file.filename}\n상태: ${file.status}\n변경 내용: ${file.patch || '상세 변경 사항 없음'}`
+        ).join('\n\n');
+
+        return this.prompt
+            .replace('{커밋 메시지}', commit.message)
+            .replace('{커밋 작성자}', commit.author.name)
+            .replace('{커밋 날짜}', commit.author.date)
+            .replace('{파일 변경 사항}', fileChanges);
     }
 
     async analyzeCommit(commitDetails) {
