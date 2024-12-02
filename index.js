@@ -135,108 +135,10 @@ class AIAnalysisService {
     }
 }
 
+/**
+ * PDF 파일 생성을 담당하는 클래스
+ */
 class PDFReportService {
-    /**
-     * 시스템에 설치된 한글 폰트를 자동으로 탐지하는 메서드
-     * @returns {string|null} 폰트 경로 또는 null
-     */
-    detectKoreanFont() {
-        // 한글 폰트 경로 후보들
-        const KOREAN_FONT_PATHS = [
-            '/System/Library/Fonts/AppleGothic.ttf',
-            '/System/Library/Fonts/Supplemental/AppleSDGothicNeoM.ttc',
-            `${process.env.HOME}/Library/Fonts/NanumGothic.ttf`,
-            '/usr/share/fonts/truetype/nanum/NanumGothic.ttf',
-            '/usr/share/fonts/truetype/nanum/NanumBarunGothic.ttf',
-            'C:\\Windows\\Fonts\\malgun.ttf',
-            'C:\\Windows\\Fonts\\NanumGothic.ttf'
-        ];
-
-        for (const fontPath of KOREAN_FONT_PATHS) {
-            try {
-                if (fs.existsSync(fontPath)) {
-                    console.log(`한글 폰트 탐지됨: ${fontPath}`);
-                    return fontPath;
-                }
-            } catch (error) {
-                // 파일 접근 오류 무시
-            }
-        }
-        
-        console.warn('한글 폰트를 탐지하지 못했습니다. 폰트를 자동으로 설치합니다.');
-        this.installKoreanFont();  // 폰트 설치 시도
-        return null;
-    }
-
-    /**
-     * 한글 폰트를 다운로드하고 설치하는 메서드
-     */
-    installKoreanFont() {
-        const platform = os.platform();
-        let fontUrl = '';
-        let fontDestination = '';
-
-        if (platform === 'darwin') {
-            // macOS: NanumGothic 다운로드 URL
-            fontUrl = 'https://github.com/google/fonts/raw/main/apache/nanum/NanumGothic.ttf';
-            fontDestination = `${process.env.HOME}/Library/Fonts/NanumGothic.ttf`;
-        } else if (platform === 'linux') {
-            // Linux: NanumGothic 다운로드 URL
-            fontUrl = 'https://github.com/google/fonts/raw/main/apache/nanum/NanumGothic.ttf';
-            fontDestination = '/usr/share/fonts/truetype/nanum/NanumGothic.ttf';
-        } else if (platform === 'win32') {
-            // Windows: Malgun 폰트 URL (Windows에서는 기본 폰트로 제공됨, 여기선 예시로 처리)
-            console.log('Windows에서는 기본 한글 폰트가 설치되어 있어야 합니다.');
-            return;
-        }
-
-        if (fontUrl && fontDestination) {
-            console.log('한글 폰트 다운로드 중...');
-            this.downloadFont(fontUrl, fontDestination);
-        }
-    }
-
-    /**
-     * 폰트를 다운로드하고 설치하는 메서드
-     * @param {string} fontUrl - 다운로드할 폰트 URL
-     * @param {string} destination - 폰트를 저장할 경로
-     */
-    downloadFont(fontUrl, destination) {
-        const file = fs.createWriteStream(destination);
-
-        https.get(fontUrl, (response) => {
-            response.pipe(file);
-            file.on('finish', () => {
-                file.close();
-                console.log(`폰트 다운로드 완료: ${destination}`);
-                this.refreshFontCache();
-            });
-        }).on('error', (err) => {
-            console.error('폰트 다운로드 실패:', err.message);
-        });
-    }
-
-    /**
-     * 폰트 캐시를 갱신하는 메서드 (운영체제마다 다름)
-     */
-    refreshFontCache() {
-        const platform = os.platform();
-
-        if (platform === 'linux') {
-            exec('fc-cache -f -v', (error, stdout, stderr) => {
-                if (error) {
-                    console.error(`폰트 캐시 갱신 실패: ${stderr}`);
-                    return;
-                }
-                console.log('폰트 캐시 갱신 완료');
-            });
-        } else if (platform === 'win32') {
-            console.log('Windows에서는 폰트 캐시 자동 갱신');
-        } else {
-            console.log('macOS에서는 자동으로 폰트 캐시가 갱신됩니다.');
-        }
-    }
-
     /**
      * PDF 파일로 커밋 분석 결과를 저장하는 메서드
      * @param {Array} analysisResults - 커밋 분석 결과 배열
@@ -250,10 +152,15 @@ class PDFReportService {
 
         doc.pipe(fs.createWriteStream(outputPath));
 
-        // 한글 폰트 경로가 있다면 폰트 등록
-        const fontPath = this.detectKoreanFont();
-        if (fontPath) {
-            doc.registerFont('KoreanFont', fontPath);
+        // NanumGothicCoding 폰트 경로
+        const fontPath = path.join(__dirname, 'fonts/NanumGothicCoding-2.5/NanumGothicCoding.ttf');
+
+        // PDFKit에 한글 폰트 등록
+        try {
+            doc.registerFont('NanumGothicCoding', fontPath);
+        } catch (error) {
+            console.error('폰트 등록 실패:', error);
+            console.log('기본 폰트로 대체합니다.');
         }
 
         analysisResults.forEach(result => {
@@ -267,7 +174,7 @@ class PDFReportService {
                 }
             })
             .fontSize(12)
-            .font(fontPath ? 'KoreanFont' : 'Helvetica')
+            .font('NanumGothicCoding') // 등록한 폰트 사용
             .text(`커밋 SHA: ${result.commitSHA}`, { underline: true })
             .moveDown()
             .text(`커밋 메시지: ${result.commitMessage}`)
@@ -284,6 +191,8 @@ class PDFReportService {
         console.log(`PDF 파일이 생성되었습니다: ${outputPath}`);
     }
 }
+
+
 
 async function main() {
     try {
