@@ -4,6 +4,7 @@
   "description": "dsm 겨울방학 대비 프로젝트",
   "main": "index.js",
   "scripts": {
+    "start": "node package/src/application.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
