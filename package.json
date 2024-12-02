@@ -1,0 +1,23 @@
+{
+  "name": "gyeoulnagi",
+  "version": "0.0.1",
+  "description": "dsm 겨울방학 대비 프로젝트",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@octokit/rest": "^21.0.2",
+    "child_process": "^1.0.2",
+    "dotenv": "^16.4.5",
+    "fontkit": "^2.0.4",
+    "fs": "^0.0.1-security",
+    "https": "^1.0.0",
+    "os": "^0.1.2",
+    "path": "^0.12.7",
+    "pdfkit": "^0.15.1"
+  }
+}
