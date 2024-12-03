@@ -1,4 +1,4 @@
-const { Octokit } = require("@octokit/rest");
+import { Octokit } from "@octokit/rest";
 
 /**
  * GitHub API와 상호작용을 담당하는 클래스
@@ -42,4 +42,4 @@ class GitHubService {
     }
 }
 
-module.exports = GitHubService;
+export default GitHubService;

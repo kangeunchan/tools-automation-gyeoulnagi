@@ -1,4 +1,4 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 /**
  * AI 기반 커밋 분석을 담당하는 클래스
@@ -61,4 +61,4 @@ class AIAnalysisService {
     }
 }
 
-module.exports = AIAnalysisService;
+export default AIAnalysisService;
