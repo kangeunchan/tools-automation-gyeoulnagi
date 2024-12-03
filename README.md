@@ -18,7 +18,7 @@
 ### 1️⃣ **저장소 클론**
 
 ```bash
-git clone https://your-repo-url.git
+git clone https://github.com/kangeunchan/tools-automation-gyeoulnagi.git
 cd github-commit-analyzer
 ```
 
