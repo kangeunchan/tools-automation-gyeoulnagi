@@ -1,6 +1,6 @@
-const PDFDocument = require('pdfkit');
-const fs = require('fs');
-const path = require('path');
+import PDFDocument from 'pdfkit';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * PDF 파일 생성을 담당하는 클래스
@@ -51,4 +51,4 @@ class PDFReportService {
     }
 }
 
-module.exports = PDFReportService;
+export default PDFReportService;
