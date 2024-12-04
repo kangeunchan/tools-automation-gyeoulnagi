@@ -6,7 +6,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 class AIAnalysisService {
     constructor(googleAIKey, defaultPrompt) {
         this.genAI = new GoogleGenerativeAI(googleAIKey);
-        this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+        this.model = this.genAI.getGenerativeModel({ model: process.env.model || "gemini-1.5-flash" });
         this.prompt = defaultPrompt || this.getDefaultPrompt();
     }
 
