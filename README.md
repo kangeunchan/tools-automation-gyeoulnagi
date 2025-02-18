@@ -19,7 +19,7 @@
 
 ```bash
 git clone https://github.com/kangeunchan/tools-automation-gyeoulnagi.git
-cd github-commit-analyzer
+cd tools-automation-gyeoulnagi
 ```
 
 ### 2️⃣ **의존성 설치**
